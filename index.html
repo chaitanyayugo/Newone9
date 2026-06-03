@@ -161,7 +161,7 @@ body{background:#000;color:var(--wh);font-family:var(--fm);overflow-x:hidden;cur
 <div id="below" id="about">— More Sections Loading —</div>
 
 <script>
-/* CURSOR */
+// CURSOR
 const $c=document.getElementById('cur');
 const $r=document.getElementById('cur-r');
 let mx=0,my=0,rx=0,ry=0;
@@ -171,7 +171,7 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
   $r.style.left=rx+'px';$r.style.top=ry+'px';
   requestAnimationFrame(tc)})();
 
-/* RENDERER */
+// RENDERER
 const cvs=document.getElementById('c3');
 const W=()=>innerWidth, H=()=>innerHeight;
 
@@ -196,9 +196,7 @@ window.addEventListener('resize',()=>{
   cam.aspect=W()/H();cam.updateProjectionMatrix();renderer.setSize(W(),H());
 });
 
-/* ════════════════════════════════
-   LIGHTS
-════════════════════════════════ */
+// ════════════════════════════════LIGHTS════════════════════════════════
 const aL=new THREE.AmbientLight(0x0d0a06,.9);
 scene.add(aL);
 
@@ -241,9 +239,7 @@ const M={
   col:mat(0x0b0b0b,.5,0,true),
 };
 
-/* ════════════════════════════════
-   HELPERS
-════════════════════════════════ */
+// ════════════════════════════════HELPERS════════════════════════════════
 function v3(x,y,z){return new THREE.Vector3(x,y,z)}
 
 function limb(A,B,rA,rB,m){
@@ -274,9 +270,7 @@ function box(pos,w,h,d,m,rx,ry,rz){
 
 function add(g,...items){items.forEach(i=>{if(i)g.add(i)})}
 
-/* ════════════════════════════════
-   CHARACTER
-════════════════════════════════ */
+// ════════════════════════════════CHARACTER════════════════════════════════
 const CG=new THREE.Group();
 
 // ---- joint positions ----
@@ -348,9 +342,7 @@ add(CG,
   box(v3(J.rAn.x,J.rAn.y-.04,J.rAn.z+.06),.1,.075,.2,M.so)
 );
 
-/* ════════════════════════════════
-   LAPTOP
-════════════════════════════════ */
+// ════════════════════════════════LAPTOP════════════════════════════════
 const lapG=new THREE.Group();
 lapG.position.set(0,.88,.31);
 lapG.rotation.x=.06; // slight tilt toward character
@@ -415,9 +407,7 @@ CG.rotation.y=Math.PI*.62;
 CG.position.set(3.5,0,0);
 scene.add(CG);
 
-/* ════════════════════════════════
-   SCREEN CONTENT
-════════════════════════════════ */
+// ══════════════════════════════SCREEN CONTENT════════════════════════════════
 const cLines=[
   '$ python low_stock_alert.py',
   '  Connecting Odoo XML-RPC...',
@@ -466,9 +456,7 @@ function drawScreen(lp){
   scTex.needsUpdate=true;
 }
 
-/* ════════════════════════════════
-   ENVIRONMENT
-════════════════════════════════ */
+// ═══════════════════════════════ENVIRONMENT════════════════════════════════
 // Floor
 const flM=new THREE.Mesh(new THREE.PlaneGeometry(28,28),M.fl);
 flM.rotation.x=-Math.PI/2;flM.position.y=.5;flM.receiveShadow=true;scene.add(flM);
@@ -482,9 +470,7 @@ refM.rotation.x=-Math.PI/2;refM.position.y=.51;refM.receiveShadow=true;scene.add
 const grid=new THREE.GridHelper(22,30,0x003318,0x001a0e);
 grid.position.y=.52;grid.material.transparent=true;grid.material.opacity=0;scene.add(grid);
 
-/* ════════════════════════════════
-   PARTICLES
-════════════════════════════════ */
+// ════════════════════════════════ PARTICLES════════════════════════════════
 // Background dust — gold tones
 const BGN=2200;
 const bgG=new THREE.BufferGeometry();
