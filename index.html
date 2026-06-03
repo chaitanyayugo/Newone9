@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chaitanya Srivastava</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#C9A84C;--gb:#F2CB6A;--gd:#5A4018;
+  --bl:#000000;--wh:#F0EBE0;--wd:#7A7060;
+  --gr:#00FF88;--fd:'Bebas Neue',sans-serif;
+  --fs:'Playfair Display',serif;--fm:'DM Mono',monospace
+}
+html{scroll-behavior:smooth}
+body{background:#000;color:var(--wh);font-family:var(--fm);overflow-x:hidden;cursor:none}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:var(--gd)}
+
+/* CURSOR */
+#cur{position:fixed;z-index:9999;pointer-events:none;width:8px;height:8px;
+  background:var(--gb);border-radius:50%;transform:translate(-50%,-50%);
+  mix-blend-mode:difference;transition:transform .15s}
+#cur-r{position:fixed;z-index:9998;pointer-events:none;width:32px;height:32px;
+  border:1px solid rgba(201,168,76,.45);border-radius:50%;
+  transform:translate(-50%,-50%);transition:width .35s,height .35s,border-color .25s}
+
+/* PROGRESS BAR */
+#pb{position:fixed;top:0;left:0;height:2px;z-index:600;width:0%;
+  background:linear-gradient(90deg,var(--gd),var(--g))}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.4rem 3rem;border-bottom:1px solid transparent;
+  transition:background .5s,backdrop-filter .5s,border-color .5s}
+#nav.sc{background:rgba(0,0,0,.8);backdrop-filter:blur(24px);border-color:rgba(201,168,76,.08)}
+.nl{font-family:var(--fd);font-size:1.25rem;letter-spacing:.2em;color:var(--g);text-decoration:none;cursor:none}
+.nv{display:flex;gap:2.5rem;list-style:none}
+.nv a{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(240,235,224,.45);
+  text-decoration:none;cursor:none;transition:color .22s}
+.nv a:hover{color:var(--g)}
+.ns{display:flex;align-items:center;gap:.5rem;font-size:.58rem;letter-spacing:.15em;color:rgba(240,235,224,.4)}
+.nd{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* HERO SCROLL */
+#ss{height:380vh;position:relative}
+#sk{position:sticky;top:0;height:100vh;overflow:hidden;background:#000}
+#c3{position:absolute;inset:0;width:100%;height:100%}
+
+/* OVERLAYS */
+.vig{position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse 75% 75% at 50% 50%,transparent 38%,rgba(0,0,0,.65) 100%)}
+.grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.45;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E")}
+.scl{position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.035) 2px,rgba(0,0,0,.035) 4px)}
+
+/* HERO TEXT */
+#ht{position:absolute;z-index:10;left:4.5rem;top:12%;max-width:44vw;opacity:0;transition:opacity .6s}
+.ht1{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--g);
+  margin-bottom:1.1rem;opacity:0;transform:translateY(14px);transition:opacity .9s,transform .9s}
+.ht2{font-family:var(--fd);font-size:clamp(3.5rem,9vw,9rem);line-height:.87;letter-spacing:.04em;
+  color:var(--wh);opacity:0;transform:translateY(22px);transition:opacity .9s .12s,transform .9s .12s}
+.ht2 em{color:var(--g);font-style:normal}
+.ht3{font-family:var(--fs);font-size:clamp(.9rem,1.8vw,1.35rem);font-style:italic;
+  color:rgba(240,235,224,.52);line-height:1.6;margin-top:1.2rem;
+  opacity:0;transform:translateY(14px);transition:opacity .8s .25s,transform .8s .25s}
+.ht4{display:flex;gap:1.1rem;margin-top:1.8rem;
+  opacity:0;transform:translateY(14px);transition:opacity .8s .38s,transform .8s .38s}
+#ht.in .ht1,#ht.in .ht2,#ht.in .ht3,#ht.in .ht4{opacity:1;transform:none}
+.bp{padding:.8rem 2.1rem;background:var(--g);color:#000;font-family:var(--fm);
+  font-size:.63rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;border:none;cursor:none;transition:background .22s,transform .2s}
+.bp:hover{background:var(--gb);transform:translateY(-2px)}
+.bg{padding:.8rem 2.1rem;background:transparent;color:var(--g);font-family:var(--fm);
+  font-size:.63rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;border:1px solid var(--gd);cursor:none;
+  transition:border-color .22s,color .22s,transform .2s}
+.bg:hover{border-color:var(--g);color:var(--gb);transform:translateY(-2px)}
+
+/* PHASE DOTS */
+#pds{position:absolute;z-index:10;right:2.5rem;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.7rem}
+.pd{width:4px;height:4px;border-radius:99px;background:rgba(201,168,76,.22);
+  transition:height .4s,background .4s,box-shadow .4s}
+.pd.on{height:22px;background:var(--g);box-shadow:0 0 10px var(--g)}
+
+/* SCROLL HINT */
+#sh{position:absolute;z-index:10;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  font-size:.54rem;letter-spacing:.28em;text-transform:uppercase;
+  color:rgba(201,168,76,.45);animation:fup .8s 1.6s both}
+.sa{width:1px;height:36px;background:linear-gradient(to bottom,var(--g),transparent);animation:sap 1.9s ease-in-out infinite}
+@keyframes sap{0%,100%{transform:scaleY(.5);opacity:.3}50%{transform:scaleY(1);opacity:1}}
+@keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%)}}
+
+/* BELOW */
+#below{background:#030303;min-height:50vh;display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(201,168,76,.15);position:relative;z-index:2}
+
+/* MOBILE */
+@media(max-width:768px){
+  #nav{padding:1rem 1.5rem}
+  .nv{display:none}
+  #ht{left:1.5rem;right:1.5rem;max-width:none;top:8%}
+  #pds{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+<div id="pb"></div>
+
+<nav id="nav">
+  <a href="#" class="nl">CS</a>
+  <ul class="nv">
+    <li><a href="#about">About</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#experience">XP</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="ns"><span class="nd"></span>Available Now</div>
+</nav>
+
+<div id="ss">
+  <div id="sk">
+    <canvas id="c3"></canvas>
+    <div class="vig"></div>
+    <div class="grain"></div>
+    <div class="scl"></div>
+
+    <div id="ht">
+      <p class="ht1">MCA &nbsp;·&nbsp; Data Analyst &nbsp;·&nbsp; Solution Architect</p>
+      <h1 class="ht2">CHAI<em>TAN</em>YA<br/>SRIVA<em>ST</em>AVA</h1>
+      <p class="ht3">I walk into broken systems.<br/>I leave working ones behind.</p>
+      <div class="ht4">
+        <a href="#work" class="bp">See My Work</a>
+        <a href="mailto:chaitanyayugo@gmail.com" class="bg">Hire Me</a>
+      </div>
+    </div>
+
+    <div id="pds">
+      <div class="pd on" id="pd0"></div>
+      <div class="pd" id="pd1"></div>
+      <div class="pd" id="pd2"></div>
+    </div>
+
+    <div id="sh"><div class="sa"></div>Scroll</div>
+  </div>
+</div>
+
+<div id="below" id="about">— More Sections Loading —</div>
+
+<script>
+/* ════════════════════════════════
+   CURSOR
+════════════════════════════════ */
+const $c=document.getElementById('cur');
+const $r=document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+(function tc(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+  $c.style.left=mx+'px';$c.style.top=my+'px';
+  $r.style.left=rx+'px';$r.style.top=ry+'px';
+  requestAnimationFrame(tc)})();
+
+/* ════════════════════════════════
+   RENDERER
+════════════════════════════════ */
+const cvs=document.getElementById('c3');
+const W=()=>innerWidth, H=()=>innerHeight;
+
+const renderer=new THREE.WebGLRenderer({canvas:cvs,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(W(),H());
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.1;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x000000);
+scene.fog=new THREE.FogExp2(0x000000,.055);
+
+const cam=new THREE.PerspectiveCamera(42,W()/H(),.1,120);
+cam.position.set(0,1.5,7.8);
+cam.lookAt(0,1.1,0);
+
+window.addEventListener('resize',()=>{
+  cam.aspect=W()/H();cam.updateProjectionMatrix();renderer.setSize(W(),H());
+});
+
+/* ════════════════════════════════
+   LIGHTS
+════════════════════════════════ */
+const aL=new THREE.AmbientLight(0x0d0a06,.9);
+scene.add(aL);
+
+const kL=new THREE.DirectionalLight(0xfff4d0,2.8);
+kL.position.set(4,7,4);kL.castShadow=true;
+kL.shadow.mapSize.set(2048,2048);
+kL.shadow.camera.near=.1;kL.shadow.camera.far=30;
+kL.shadow.camera.left=-5;kL.shadow.camera.right=5;
+kL.shadow.camera.top=5;kL.shadow.camera.bottom=-5;
+kL.shadow.bias=-.001;
+scene.add(kL);
+
+const rL=new THREE.DirectionalLight(0x1a2f50,2.2);
+rL.position.set(-5,3,-4);scene.add(rL);
+
+const fL=new THREE.DirectionalLight(0x080402,.6);
+fL.position.set(-3,1,3);scene.add(fL);
+
+const scL=new THREE.PointLight(0x00ff88,0,6,2);
+scL.position.set(0,1.4,.8);scene.add(scL);
+
+/* ════════════════════════════════
+   MATERIALS
+════════════════════════════════ */
+function mat(col,rough,metal,flat){
+  return new THREE.MeshStandardMaterial({color:col,roughness:rough,metalness:metal||0,flatShading:!!flat});
+}
+const M={
+  sk: mat(0x8C5E45,.75,0,true),
+  hr: mat(0x0C0805,1,0,true),
+  sh: mat(0x09101F,.55,.05,true),
+  pt: mat(0x0F1318,.68,0,true),
+  so: mat(0x060606,.4,.45,true),
+  lp: mat(0x1A1A1A,.12,.9,false),
+  lpd:mat(0x252525,.22,.95,false),
+  gd: new THREE.MeshStandardMaterial({color:0xC9A84C,roughness:.18,metalness:.92,emissive:0xC9A84C,emissiveIntensity:.04}),
+  sf: mat(0x080808,.25,.7,false),
+  fl: mat(0x040404,.95,.2,true),
+  gl: mat(0x181818,.12,.97,false),
+  col:mat(0x0b0b0b,.5,0,true),
+};
+
+/* ════════════════════════════════
+   HELPERS
+════════════════════════════════ */
+function v3(x,y,z){return new THREE.Vector3(x,y,z)}
+
+function limb(A,B,rA,rB,m){
+  const d=new THREE.Vector3().subVectors(B,A);
+  const len=d.length(); if(len<.001)return null;
+  const mesh=new THREE.Mesh(new THREE.CylinderGeometry(rA,rB,len,10,1),m);
+  mesh.position.lerpVectors(A,B,.5);
+  d.normalize();
+  const up=new THREE.Vector3(0,1,0);
+  if(d.y>0.9999){}
+  else if(d.y<-0.9999){mesh.quaternion.setFromAxisAngle(new THREE.Vector3(1,0,0),Math.PI)}
+  else{mesh.quaternion.setFromUnitVectors(up,d)}
+  mesh.castShadow=true;mesh.receiveShadow=true;
+  return mesh;
+}
+
+function ball(pos,r,seg,m){
+  const mesh=new THREE.Mesh(new THREE.SphereGeometry(r,seg,Math.ceil(seg*.7)),m);
+  mesh.position.copy(pos);mesh.castShadow=true;return mesh;
+}
+
+function box(pos,w,h,d,m,rx,ry,rz){
+  const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+  mesh.position.copy(pos);
+  if(rx)mesh.rotation.x=rx; if(ry)mesh.rotation.y=ry; if(rz)mesh.rotation.z=rz;
+  mesh.castShadow=true;mesh.receiveShadow=true;return mesh;
+}
+
+function add(g,...items){items.forEach(i=>{if(i)g.add(i)})}
+
+/* ════════════════════════════════
+   CHARACTER
+════════════════════════════════ */
+const CG=new THREE.Group();
+
+// ---- joint positions ----
+const J={
+  pel: v3(0,.88,0),  chst:v3(0,1.44,0), neck:v3(0,1.57,.02), hd:v3(0,1.79,0),
+  lSh: v3(-.24,1.41,.01), lEl:v3(-.35,1.04,.14), lWr:v3(-.19,.91,.29),
+  rSh: v3( .24,1.41,.01), rEl:v3( .35,1.04,.14), rWr:v3( .19,.91,.29),
+  lHp: v3(-.16,.84,0), lKn:v3(-.16,.80,.44), lAn:v3(-.16,.50,.44),
+  rHp: v3( .16,.84,0), rKn:v3( .16,.80,.44), rAn:v3( .16,.50,.44),
+};
+
+// HEAD — icosahedron low-poly
+const headM=new THREE.Mesh(new THREE.IcosahedronGeometry(.195,2),M.sk);
+headM.position.copy(J.hd);headM.scale.set(1,.02+1.08,.93);headM.castShadow=true;CG.add(headM);
+
+// Hair dome
+const hairGeo=new THREE.SphereGeometry(.2,18,10,0,Math.PI*2,0,Math.PI*.56);
+const hairM=new THREE.Mesh(hairGeo,M.hr);
+hairM.position.set(J.hd.x,J.hd.y+.01,J.hd.z-.01);CG.add(hairM);
+
+// Glasses bar
+add(CG,box(v3(J.hd.x,J.hd.y-.025,J.hd.z+.186),.29,.055,.018,M.gl));
+// Lens tint
+const lensMat=new THREE.MeshBasicMaterial({color:0x001206,transparent:true,opacity:.88});
+add(CG,
+  box(v3(J.hd.x-.09,J.hd.y-.025,J.hd.z+.191),.11,.042,.009,lensMat),
+  box(v3(J.hd.x+.09,J.hd.y-.025,J.hd.z+.191),.11,.042,.009,lensMat)
+);
+// Temple arms
+add(CG,
+  limb(v3(J.hd.x-.195,J.hd.y-.025,J.hd.z+.185),v3(J.hd.x-.195,J.hd.y-.025,J.hd.z-.09),.006,.006,M.gl),
+  limb(v3(J.hd.x+.195,J.hd.y-.025,J.hd.z+.185),v3(J.hd.x+.195,J.hd.y-.025,J.hd.z-.09),.006,.006,M.gl)
+);
+
+// Neck
+add(CG,limb(J.neck,J.hd,.068,.062,M.sk));
+
+// Torso
+const torsoM=new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,.60,11,1,false),M.sh);
+torsoM.position.set(0,1.16,0);torsoM.castShadow=true;CG.add(torsoM);
+// Collar
+add(CG,new THREE.Mesh(new THREE.CylinderGeometry(.082,.092,.065,11),M.col));
+CG.children[CG.children.length-1].position.set(0,1.45,.01);CG.children[CG.children.length-1].castShadow=true;
+// Hips
+const hipsM=new THREE.Mesh(new THREE.CylinderGeometry(.195,.18,.18,11),M.pt);
+hipsM.position.set(0,.82,0);CG.add(hipsM);
+
+// Shoulders (ball joints)
+add(CG,ball(J.lSh,.082,10,M.sh),ball(J.rSh,.082,10,M.sh));
+
+// Arms
+add(CG,
+  limb(J.lSh,J.lEl,.065,.06,M.sh), ball(J.lEl,.062,10,M.sh),
+  limb(J.lEl,J.lWr,.057,.05,M.sk), ball(J.lWr,.052,9,M.sk),
+  limb(J.rSh,J.rEl,.065,.06,M.sh), ball(J.rEl,.062,10,M.sh),
+  limb(J.rEl,J.rWr,.057,.05,M.sk), ball(J.rWr,.052,9,M.sk)
+);
+
+// Legs
+add(CG,
+  limb(J.lHp,J.lKn,.1,.09,M.pt), ball(J.lKn,.093,10,M.pt),
+  limb(J.lKn,J.lAn,.085,.074,M.pt),
+  limb(J.rHp,J.rKn,.1,.09,M.pt), ball(J.rKn,.093,10,M.pt),
+  limb(J.rKn,J.rAn,.085,.074,M.pt)
+);
+// Shoes
+add(CG,
+  box(v3(J.lAn.x,J.lAn.y-.04,J.lAn.z+.06),.1,.075,.2,M.so),
+  box(v3(J.rAn.x,J.rAn.y-.04,J.rAn.z+.06),.1,.075,.2,M.so)
+);
+
+/* ════════════════════════════════
+   LAPTOP
+════════════════════════════════ */
+const lapG=new THREE.Group();
+lapG.position.set(0,.88,.31);
+lapG.rotation.x=.06; // slight tilt toward character
+
+// Base
+add(lapG,
+  new THREE.Mesh(new THREE.BoxGeometry(.50,.022,.36),M.lp), // main base
+  new THREE.Mesh(new THREE.BoxGeometry(.502,.006,.362),M.gd), // gold rim
+  box(v3(0,.013,.03),.38,.004,.22,new THREE.MeshStandardMaterial({color:0x080808,roughness:.95})), // keyboard
+  box(v3(0,.014,.14),.18,.003,.12,new THREE.MeshStandardMaterial({color:0x121212,roughness:.3,metalness:.65})) // trackpad
+);
+lapG.children[1].position.y=-.008;
+
+// Lid pivot — hinge at back of base, top surface
+const lidPiv=new THREE.Group();
+lidPiv.position.set(0,.011,-.18);
+lapG.add(lidPiv);
+
+// Lid geometry: BoxGeometry(w=.50, h=.30, d=.022) — thin in Z, tall in Y
+// When rotation.x = 0: lid stands vertical (open, screen faces +Z = camera)
+// When rotation.x = PI/2: lid is flat (closed, lies over base)
+const lidMesh=new THREE.Mesh(new THREE.BoxGeometry(.50,.30,.022),M.lp);
+lidMesh.position.set(0,.15,.011);
+lidPiv.add(lidMesh);
+
+// Gold trim on lid
+const lidTrim=new THREE.Mesh(new THREE.BoxGeometry(.502,.302,.024),M.gd);
+lidTrim.scale.set(1,.04,1);
+lidTrim.position.set(0,.011-.005,.011);
+lidPiv.add(lidTrim);
+
+// Bezel (screen frame, front face of lid)
+const bezel=new THREE.Mesh(new THREE.BoxGeometry(.46,.265,.006),M.sf);
+bezel.position.set(0,.155,.012);
+lidPiv.add(bezel);
+
+// Screen canvas texture
+const scC=document.createElement('canvas');
+scC.width=640;scC.height=400;
+const scX=scC.getContext('2d');
+const scTex=new THREE.CanvasTexture(scC);
+
+const scMesh=new THREE.Mesh(
+  new THREE.PlaneGeometry(.42,.248),
+  new THREE.MeshBasicMaterial({map:scTex,transparent:true,opacity:0})
+);
+scMesh.position.set(0,.154,.013);
+lidPiv.add(scMesh);
+
+// Brand mark
+const brand=new THREE.Mesh(new THREE.BoxGeometry(.038,.03,.003),M.gd);
+brand.position.set(0,.155,.012);
+lidPiv.add(brand);
+
+// START CLOSED
+lidPiv.rotation.x=Math.PI*.5;
+
+CG.add(lapG);
+
+// Character initial state: on right, facing mostly away
+CG.rotation.y=Math.PI*.62;
+CG.position.set(3.5,0,0);
+scene.add(CG);
+
+/* ════════════════════════════════
+   SCREEN CONTENT
+════════════════════════════════ */
+const cLines=[
+  '$ python low_stock_alert.py',
+  '  Connecting Odoo XML-RPC...',
+  '  Fetching 2,500 products...',
+  '  Low stock: 200 items flagged',
+  '✓ Report → 5 recipients. Done.',
+  '',
+  '$ git push origin main',
+  '  GitHub Actions: syncing...',
+  '  Dashboard: 2,500 SKUs live',
+  '✓ 15 staff notified.',
+  '',
+  '$ ./pipeline --revenue --auto',
+  '  Processing 18 orders today',
+  '  4h manual effort → 0 min',
+  '✓ Closed-loop. Zero touch.',
+  '$ _'
+];
+
+function drawScreen(lp){
+  const W=640,H=400;
+  scX.fillStyle='#000d07'; scX.fillRect(0,0,W,H);
+  // scanlines
+  for(let y=0;y<H;y+=4){scX.fillStyle='rgba(0,0,0,.18)';scX.fillRect(0,y,W,1)}
+  // header bar
+  scX.fillStyle='#001a0d';scX.fillRect(0,0,W,26);
+  scX.fillStyle='#ff5f56';scX.fillRect(11,9,10,10);
+  scX.fillStyle='#ffbd2e';scX.fillRect(28,9,10,10);
+  scX.fillStyle='#27c93f';scX.fillRect(45,9,10,10);
+  scX.fillStyle='#00bb55';scX.font='11px DM Mono,monospace';
+  scX.fillText('chaitanya@dimensions: ~',65,19);
+  const vis=Math.floor(lp*cLines.length*1.6);
+  cLines.forEach((ln,i)=>{
+    if(i>vis)return;
+    scX.globalAlpha=Math.min(1,(vis-i+1))*.95;
+    if(ln.startsWith('$'))scX.fillStyle='#00ff88';
+    else if(ln.startsWith('✓'))scX.fillStyle='#00ffcc';
+    else if(ln.startsWith('  '))scX.fillStyle='#44bb77';
+    else scX.fillStyle='#00cc66';
+    scX.font='11px DM Mono,monospace';
+    scX.fillText(ln,14,44+i*22);
+  });
+  scX.globalAlpha=1;
+  // cursor blink
+  if(Math.sin(Date.now()*.005)>0){scX.fillStyle='#00ff88';scX.fillRect(24,44+(cLines.length-1)*22-2,7,13)}
+  scTex.needsUpdate=true;
+}
+
+/* ════════════════════════════════
+   ENVIRONMENT
+════════════════════════════════ */
+// Floor
+const flM=new THREE.Mesh(new THREE.PlaneGeometry(28,28),M.fl);
+flM.rotation.x=-Math.PI/2;flM.position.y=.5;flM.receiveShadow=true;scene.add(flM);
+
+// Reflective ground
+const refM=new THREE.Mesh(new THREE.PlaneGeometry(18,18),
+  new THREE.MeshStandardMaterial({color:0x030303,roughness:.08,metalness:.92,transparent:true,opacity:.55}));
+refM.rotation.x=-Math.PI/2;refM.position.y=.51;refM.receiveShadow=true;scene.add(refM);
+
+// Grid (emerges on laptop open)
+const grid=new THREE.GridHelper(22,30,0x003318,0x001a0e);
+grid.position.y=.52;grid.material.transparent=true;grid.material.opacity=0;scene.add(grid);
+
+/* ════════════════════════════════
+   PARTICLES
+════════════════════════════════ */
+// Background dust — gold tones
+const BGN=2200;
+const bgG=new THREE.BufferGeometry();
+const bgP=new Float32Array(BGN*3);
+const bgC=new Float32Array(BGN*3);
+for(let i=0;i<BGN;i++){
+  bgP[i*3]=(Math.random()-.5)*26; bgP[i*3+1]=Math.random()*13-1; bgP[i*3+2]=(Math.random()-.5)*14-2;
+  const hi=Math.random()>.78;
+  bgC[i*3]=hi?.20:.07; bgC[i*3+1]=hi?.15:.06; bgC[i*3+2]=hi?.05:.02;
+}
+bgG.setAttribute('position',new THREE.BufferAttribute(bgP,3));
+bgG.setAttribute('color',new THREE.BufferAttribute(bgC,3));
+const bgPts=new THREE.Points(bgG,new THREE.PointsMaterial({size:.022,vertexColors:true,transparent:true,opacity:.55,sizeAttenuation:true}));
+scene.add(bgPts);
+
+// Code rain — green, falls vertically
+const CRN=1100;
+const crG=new THREE.BufferGeometry();
+const crP=new Float32Array(CRN*3);
+const crV=new Float32
